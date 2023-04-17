@@ -13,15 +13,15 @@ def zero_padding(tensor, x_init, y_init):
     if(y < 16):
         y = 16
 
-    mod_x = (x/16) % 2  #the matrix must have dimentions that are even multiples of 16 otherwise I cannot properly slice into blocks
-    mod_y = (y/16) % 2
+    mod_x = x % 16  #the matrix must have dimentions that are multiples of 16 otherwise I cannot properly slice into blocks
+    mod_y = y % 16
 
     if( mod_x != 0):
-        while( ((x/16) % 2) != 0):
+        while((x % 16) != 0):
             x += 1
 
     if( mod_y != 0):
-        while( ((y/16) % 2 ) != 0):
+        while((y % 16) != 0):
             y += 1
 
     tensor_padded = torch.zeros(x, y)
