@@ -9,6 +9,12 @@ print(k)
 
 k = -1 % 1
 print(k)
+ 
+match str(k) : 
+    case "0" : 
+        print("0")
+    case _ : 
+        print("Defoault")
 
 
 
