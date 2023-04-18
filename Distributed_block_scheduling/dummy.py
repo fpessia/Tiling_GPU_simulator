@@ -5,8 +5,18 @@ import threading
 import sys
 
 
+def change_list(l, range):
+    l[range] = [0, 1]
+
+l = [0,0]
+iter  0 : range(len(l))
+change_list(l,r)
+print(l)
 
 
+
+
+sys.exit()
 def summer(A,B, index,result):
     result[index] = A+B
 
