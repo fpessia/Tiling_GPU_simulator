@@ -43,7 +43,8 @@ def result_reordering(result_list,n_ms,n_ks,n_ns, x_space, y_space):
     
     for m in range(n_ms):
         for n in range(n_ns):
-            C[m*x_space : (m+1)*x_space, n*y_space : (n+1)*y_space] = C_sublock[n_ns+n_ms]
+            C[m*x_space : (m+1)*x_space, n*y_space : (n+1)*y_space] = C_sublock[n+m*n_ns]
+    
     return C
 
 
@@ -66,19 +67,25 @@ def Tiling2D(tensor1, tensor2, number_of_MS, number_of_CTA_per_MS, scheduling_pr
     strategy = tiling_strategies[0]
 
     #Zero padding
-    tensor1_padded = zero_padding(tensor1, initial_x1, initial_y1)
+    tensor1_padded = zero_padding(tensor1, x1, y1)
     x1,y1 = tensor1_padded.size()
-    tensor2_padded = zero_padding(tensor2, initial_x2, initial_y2)
+    tensor2_padded = zero_padding(tensor2, x2, y2)
     x2,y2 = tensor2_padded.size()
 
+    if( y1 != x2):
+        print("Error invalid matrix dimentions for multiplication afther padding \n")
+        return torch.zeros(x1,y2)
+    
+    print("Paded dim x1 : " + str(x1)+ "\n Padded dim y1 : "+ str(y1)+ "\n Padded x2 : "+ str(x2)+ "\n Padded y2 : " +str(y2)+ " \n")
+
     #I have to decide the blocks size according to CUTLASS strategies of block sizing
-    if((x1 % 128) == 0 and (y2 % 128) == 0):
+    if(((x1 % 128) == 0) and ((y2 % 128) == 0)):
         strategy = tiling_strategies[6]
-    elif((x1 % 32) == 0 and (y2 % 128) == 0):
+    elif(((x1 % 32) == 0) and ((y2 % 128) == 0)):
         strategy = tiling_strategies[5]
-    elif((x1 % 128) == 0 and (y2 % 32) == 0):
+    elif(((x1 % 128) == 0) and ((y2 % 32) == 0)):
         strategy = tiling_strategies[4]
-    elif((x1 % 64)== 0 and (y2 % 64)):
+    elif((x1 % 64)== 0 and (y2 % 64) == 0):
         strategy = tiling_strategies[3]
     elif((x1 % 32) == 0 and (y2 % 32)== 0):
         strategy = tiling_strategies[2]
@@ -87,6 +94,7 @@ def Tiling2D(tensor1, tensor2, number_of_MS, number_of_CTA_per_MS, scheduling_pr
 
     CTA_list = []
     if(strategy == "Huge"): 
+        print("EXE Huge \n")
         n_ms = int(x1/128)
         n_ks = int(y1/8)
         n_ns = int(y2/128)
@@ -99,10 +107,12 @@ def Tiling2D(tensor1, tensor2, number_of_MS, number_of_CTA_per_MS, scheduling_pr
                     CTA_list.append((A,B)) 
         #Scheduler
         result_list= Scheduler(CTA_list, number_of_MS,number_of_CTA_per_MS,scheduling_protocol)
+      
         C_padded = result_reordering(result_list,n_ms,n_ks,n_ns,128,128)
         return C_padded[0: initial_x1, 0 : initial_y2]
 
     elif(strategy == "Wide"):
+        print("EXE Wide \n")
         n_ms = int( x1/32)
         n_ks = int(y1/8)
         n_ns = int(y2/128)
@@ -119,6 +129,7 @@ def Tiling2D(tensor1, tensor2, number_of_MS, number_of_CTA_per_MS, scheduling_pr
         return C_padded[0: initial_x1, 0 : initial_y2]
 
     elif(strategy == "Tall"):
+        print("EXE Tall \n")
         n_ms = int(x1/128)
         n_ks = int(y1/8)
         n_ns = int(y2/32)
@@ -135,6 +146,7 @@ def Tiling2D(tensor1, tensor2, number_of_MS, number_of_CTA_per_MS, scheduling_pr
         return C_padded[0: initial_x1, 0 : initial_y2]
 
     elif(strategy == "Large"):
+        print("EXE Large \n")
         n_ms = int(x1/64)
         n_ks = int(y1/8)
         n_ns = int(y2/64)
@@ -151,6 +163,7 @@ def Tiling2D(tensor1, tensor2, number_of_MS, number_of_CTA_per_MS, scheduling_pr
         return C_padded[0: initial_x1, 0 : initial_y2]
 
     elif(strategy == "Medium"):
+        print("EXE Medium \n")
         n_ms = int(x1/32)
         n_ks = int(y1/8)
         n_ns = int(y2/32)
@@ -166,8 +179,9 @@ def Tiling2D(tensor1, tensor2, number_of_MS, number_of_CTA_per_MS, scheduling_pr
         C_padded = result_reordering(result_list,n_ms,n_ks,n_ns,32,32)
         return C_padded[0: initial_x1, 0 : initial_y2]
     elif(strategy == "Small"):
+        print("EXE Small \n")
         n_ms = int(x1/16)
-        n_ks = int(y1/16)
+        n_ks = int(y1/8)
         n_ns = int(y2/16)
 
         for ms in range(n_ms):

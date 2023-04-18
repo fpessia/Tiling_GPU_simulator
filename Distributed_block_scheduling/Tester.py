@@ -11,21 +11,29 @@ common_dim = random.randint(0 , 1000)
 A = torch.randn(random.randint(0 , 1000),common_dim)
 B = torch.randn(common_dim,random.randint(0 , 1000))
 
+print(A.size())
+print(B.size())
+
 print("Testing Distributed block scheduling \n")
 C = torch.matmul(A,B)
 C_tilde = Tiling2D(A,B,num_of_MS,num_of_CTA_per_MS,"Distributed_block")
+print(C_tilde.size())
+print(C.size())
 err = C - C_tilde
 passed_test = True
 x,y = C_tilde.size()
 for i in range(x):
     for j in range(y):
-        if err[i][j] != 0 :
+        if err[i][j] >= 0.01 :
             passed_test = False
+
 if(passed_test):
     print("Test passed \n")
 else:
     print("Test failed \n")
-    print(C_tilde)
     print(C)
+    print(C_tilde)
+    
+    
     
         

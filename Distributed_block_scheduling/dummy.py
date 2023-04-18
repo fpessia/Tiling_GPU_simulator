@@ -5,13 +5,13 @@ import threading
 import sys
 
 
-def change_list(l, range):
-    l[range] = [0, 1]
+t1 = torch.tensor([[1,0],[0,1]])
+t2 = torch.tensor([[1,0],[0,1]])
+print(t1+t2)
 
-l = [0,0]
-iter  0 : range(len(l))
-change_list(l,r)
-print(l)
+sys.exit()
+
+
 
 
 
