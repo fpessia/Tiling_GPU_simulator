@@ -76,7 +76,7 @@ def Tiling2D(tensor1, tensor2, number_of_MS, number_of_CTA_per_MS, scheduling_pr
         print("Error invalid matrix dimentions for multiplication afther padding \n")
         return torch.zeros(x1,y2)
     
-    print("Paded dim x1 : " + str(x1)+ "\n Padded dim y1 : "+ str(y1)+ "\n Padded x2 : "+ str(x2)+ "\n Padded y2 : " +str(y2)+ " \n")
+    #print("Paded dim x1 : " + str(x1)+ "\n Padded dim y1 : "+ str(y1)+ "\n Padded x2 : "+ str(x2)+ "\n Padded y2 : " +str(y2)+ " \n")
 
     #I have to decide the blocks size according to CUTLASS strategies of block sizing
     if(((x1 % 128) == 0) and ((y2 % 128) == 0)):

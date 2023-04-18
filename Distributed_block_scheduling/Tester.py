@@ -24,7 +24,7 @@ passed_test = True
 x,y = C_tilde.size()
 for i in range(x):
     for j in range(y):
-        if err[i][j] >= 0.01 :
+        if err[i][j] >= 0.01 or err[i][j] <= -0.01:
             passed_test = False
 
 if(passed_test):
