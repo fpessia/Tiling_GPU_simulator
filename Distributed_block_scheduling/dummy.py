@@ -1,21 +1,68 @@
 
 import torch
 import math
+import threading
 import sys
 
 
+
+
+def summer(A,B, index,result):
+    result[index] = A+B
+
+
+result =[0, 0]
+x = []
+
+for i in range(len(result)):
+    x.append(threading.Thread(target=summer, args=((i+1),(i+2),i,result)))
+for i in range(len(result)):
+    x[i].start()
+flag = False
+while(not(flag)):
+    if(result[0] != 0):
+        print(result[0])
+    if(result[1] != 0):
+        print(result[1])
+    if(result[0] != 0 and result[1] != 0):
+        flag = True
+
+sys.exit()
+def ll(l):
+    l[0] += 1
+
+l=[0,0]
+ll(l)
+print(l)
+print(len(l))
+
+sys.exit()
+h = 15
+g = 4
+print(int(h/g))
+m = 16 
+m = m -int(h/g)
+print(m)
+
+sys.exit()
+l = []
+A = torch.randn(4,4)
+print(A)
+B = A[0: 2, 1: 3]
+C = A [1 :3, 0 : 2 ]
+l.append((B,C))
+print(l)
+print(len(l))
+
+
+
+
+sys.exit()
 k = math.log2(3) % 1
 print(k)
 
 k = -1 % 1
 print(k)
- 
-match str(k) : 
-    case "0" : 
-        print("0")
-    case _ : 
-        print("Defoault")
-
 
 
 sys.exit()
