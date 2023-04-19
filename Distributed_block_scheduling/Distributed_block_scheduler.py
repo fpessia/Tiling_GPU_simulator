@@ -35,7 +35,7 @@ def Distributed_block_scheduler(CTA_list,to_schedule_CTAs_per_MS,number_of_CTAs_
         else :
             sum = 0
             for i in range(t):
-                sum += to_schedule_CTAs_per_MS[t]
+                sum += to_schedule_CTAs_per_MS[i]
             MS_thread_list.append(threading.Thread(target=MS_distributed_block_scheduler,args=(CTA_list[sum : sum+to_schedule_CTAs_per_MS[t]],
                                                                              to_schedule_CTAs_per_MS[t],number_of_CTAs_per_MS, result,sum) ))
     for t in range(n_of_MS):

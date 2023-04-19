@@ -5,6 +5,14 @@ import threading
 import sys
 
 
+
+print(int(116850/4))
+print(116850 % 4)
+print(116850- int(116850/4)* 4)
+
+
+
+sys.exit()
 t1 = torch.tensor([[1,0],[0,1]])
 t2 = torch.tensor([[1,0],[0,1]])
 print(t1+t2)
