@@ -3,6 +3,13 @@ import torch
 import math
 import threading
 import sys
+
+ll = []
+ll.append([])
+print(ll)
+
+
+sys.exit()
 lock =threading.Lock()
 x = 512
 def div_by_2():

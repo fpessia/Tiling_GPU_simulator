@@ -13,7 +13,7 @@ for i in range(20):
     B = torch.randn(common_dim,random.randint(0 , 1000))
      
     C = torch.matmul(A,B)
-    C_tilde = Tiling2D(A,B,num_of_cluster,num_of_MS_per_cluster,num_of_CTA_per_MS,"Distributed_block")
+    C_tilde = Tiling2D(A,B,num_of_cluster,num_of_MS_per_cluster,num_of_CTA_per_MS,"Distributed_CTA")
 
     err = C - C_tilde
     passed_test = True
@@ -31,7 +31,7 @@ for i in range(20):
         #print(C)
         #print("\n\n")
         #print(C_tilde)
-        #break
+        break
         
 acc = 100* n_correct/20  
 print ("acc over 20 distributed tests" + str(acc)+ "%")

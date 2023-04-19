@@ -1,45 +1,54 @@
 import torch
 import threading 
-
-from MS import MS_simulator
-
+from MS import MS_simulator_uncontiguos_index
 
 
-def MS_distributed_CTA_scheduler(sub_CTA_list, number_of_CTA_to_exe, number_of_CTAs_per_MS,result,initial_index):
+
+def MS_distributed_CTA_scheduler(sub_CTA_list, number_of_CTA_to_exe, number_of_CTAs_per_MS,result,MS_init_inedes):
     executed_CTA = 0
-    
-
-
-
-
-
-
-def Distributed_CTA_scheduler(CTA_list, to_schedule_CTA_per_MS, number_of_CTA_per_MS):
-    
-    num_of_MS = len(to_schedule_CTA_per_MS)
-
-    A, B = CTA_list[0]
-    xr,y1 = A.size()
-    x1, yr = B.size()
-
-    MS_thread_list = []
-    result = []
-    for i in range(len(CTA_list)):
-        result.append(torch.zeros(xr, yr))
-
-    for t in range(num_of_MS):
-        if(t == 0):
-            MS_thread_list.append(threading.Thread(target=MS_distributed_CTA_scheduler, args=(CTA_list[0 : to_schedule_CTA_per_MS[t]],to_schedule_CTA_per_MS[t],
-                                                                                              number_of_CTA_per_MS,result, 0)        ))
+   
+    while(executed_CTA < number_of_CTA_to_exe):
+        if((number_of_CTA_to_exe-executed_CTA) < number_of_CTAs_per_MS):
+            MS_simulator_uncontiguos_index(sub_CTA_list[executed_CTA : number_of_CTA_to_exe],(number_of_CTA_to_exe-executed_CTA),result,MS_init_inedes[executed_CTA : number_of_CTA_to_exe])
+            executed_CTA = number_of_CTA_to_exe
         else:
-            sum = 0
-            for i in range(t):
-                sum += to_schedule_CTA_per_MS[i]
-            MS_thread_list.append(threading.Thread(target=MS_distributed_CTA_scheduler, args=(CTA_list[sum : sum+to_schedule_CTA_per_MS[t]],to_schedule_CTA_per_MS[t],
-                                                                                              number_of_CTA_per_MS, result, sum)    ))
+            MS_simulator_uncontiguos_index(sub_CTA_list[executed_CTA : executed_CTA+number_of_CTAs_per_MS],number_of_CTAs_per_MS,result, MS_init_inedes[executed_CTA : executed_CTA+number_of_CTAs_per_MS])
+            executed_CTA += number_of_CTAs_per_MS
+            
+
+
+def Distributed_CTA_scheduler(CTA_list,to_schedule_CTAs_per_MS,number_of_MS_per_cluster,number_of_CTAs_per_MS, result_list, init_index):
     
-    for t in range(num_of_MS):
-        MS_thread_list[t].start()
-        MS_thread_list[t].join()
+
+    n_touples = len(to_schedule_CTAs_per_MS)
+
+    MS_init_indexes = []
+    sub_CTA_list = []
+
+    for m in range(number_of_MS_per_cluster):
+        MS_init_indexes.append([])
+        sub_CTA_list.append([])
+        
+    #now i have to regroup all the touples for each MS
+    for touple in range(n_touples):
+        ms_index,internal_init_index,i = to_schedule_CTAs_per_MS[touple]
+        MS_init_indexes[ms_index].append(internal_init_index+init_index)
+        sub_CTA_list[ms_index].append(CTA_list[internal_init_index])
+
     
-    return result
+    threads = []
+    for ms in range(number_of_MS_per_cluster):
+        
+        threads.append(threading.Thread(target=MS_distributed_CTA_scheduler, args=(sub_CTA_list[ms][:],len(sub_CTA_list[ms]),
+                                                                                   number_of_CTAs_per_MS,result_list,MS_init_indexes[ms][:])    ))
+    for ms in range(number_of_MS_per_cluster):
+        threads[ms].start()
+    for ms in range(number_of_MS_per_cluster):
+        threads[ms].join()
+
+
+    
+
+
+
+ 

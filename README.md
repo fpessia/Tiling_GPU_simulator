@@ -9,4 +9,6 @@ DISTRIBUTED BLOCK SCHEDULER
 
 - Distributed block passed  17/20 (85 %) test with error range 0.0001
 
-DISTRIBUTED CTA SCHEDULER ...
+DISTRIBUTED CTA SCHEDULER 
+
+-Distributed CTA passed 100 % over 20 test with error range 0.001

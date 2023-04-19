@@ -1,16 +1,16 @@
 import torch
 import threading
-from MS import MS_simulator
+from MS import MS_simulator_contiguos_index
 
 
 def MS_distributed_block_scheduler(sub_CTA_list, number_of_CTA_to_exe, number_of_CTAs_per_MS,result,initial_index):
     executed_CTA = 0
     while(executed_CTA < number_of_CTA_to_exe):
         if ((number_of_CTA_to_exe- executed_CTA) < number_of_CTAs_per_MS):
-            MS_simulator(sub_CTA_list[executed_CTA : number_of_CTA_to_exe],(number_of_CTA_to_exe- executed_CTA),result, initial_index+executed_CTA )
+            MS_simulator_contiguos_index(sub_CTA_list[executed_CTA : number_of_CTA_to_exe],(number_of_CTA_to_exe- executed_CTA),result, initial_index+executed_CTA )
             executed_CTA = number_of_CTA_to_exe
         else:
-            MS_simulator(sub_CTA_list[executed_CTA : executed_CTA+number_of_CTAs_per_MS],number_of_CTAs_per_MS,result,initial_index+executed_CTA )
+            MS_simulator_contiguos_index(sub_CTA_list[executed_CTA : executed_CTA+number_of_CTAs_per_MS],number_of_CTAs_per_MS,result,initial_index+executed_CTA )
             executed_CTA += number_of_CTAs_per_MS
         
 
