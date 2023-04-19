@@ -52,7 +52,7 @@ def result_reordering(result_list,n_ms,n_ks,n_ns, x_space, y_space):
 
 
 
-def Tiling2D(tensor1, tensor2, number_of_MS, number_of_CTA_per_MS, scheduling_protocol):
+def Tiling2D(tensor1, tensor2,number_of_cluster, number_of_MS_per_cluster, number_of_CTA_per_MS, scheduling_protocol):
     x1,y1 = tensor1.size()
     x2,y2 = tensor2.size()
 
@@ -107,7 +107,7 @@ def Tiling2D(tensor1, tensor2, number_of_MS, number_of_CTA_per_MS, scheduling_pr
                     B = tensor2_padded[8*ks : 8*(ks +1), 128 * ns : 128 * (ns+1)] 
                     CTA_list.append((A,B)) 
         #Scheduler
-        result_list= Scheduler(CTA_list, number_of_MS,number_of_CTA_per_MS,scheduling_protocol)
+        result_list= Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster,number_of_CTA_per_MS,scheduling_protocol)
       
         C_padded = result_reordering(result_list,n_ms,n_ks,n_ns,128,128)
         for x in range(initial_x1, x1):
@@ -129,7 +129,7 @@ def Tiling2D(tensor1, tensor2, number_of_MS, number_of_CTA_per_MS, scheduling_pr
                    B = tensor2_padded[8*ks : 8*(ks +1), 128 * ns : 128 * (ns+1)] 
                    CTA_list.append((A,B)) 
         #Scheduler
-        result_list = Scheduler(CTA_list, number_of_MS,number_of_CTA_per_MS,scheduling_protocol)
+        result_list = Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster,number_of_CTA_per_MS,scheduling_protocol)
         C_padded = result_reordering(result_list,n_ms,n_ks,n_ns,32,128)
         for x in range(initial_x1, x1):
             for y in range(initial_y2, y2):
@@ -150,7 +150,7 @@ def Tiling2D(tensor1, tensor2, number_of_MS, number_of_CTA_per_MS, scheduling_pr
                    B = tensor2_padded[8*ks : 8*(ks +1), 32 * ns : 32 * (ns+1)] 
                    CTA_list.append((A,B)) 
         #Scheduler
-        result_list = Scheduler(CTA_list, number_of_MS,number_of_CTA_per_MS,scheduling_protocol)
+        result_list = Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster,number_of_CTA_per_MS,scheduling_protocol)
         C_padded = result_reordering(result_list,n_ms,n_ks,n_ns,128,32)
         for x in range(initial_x1, x1):
             for y in range(initial_y2, y2):
@@ -171,7 +171,7 @@ def Tiling2D(tensor1, tensor2, number_of_MS, number_of_CTA_per_MS, scheduling_pr
                    B = tensor2_padded[8*ks : 8*(ks +1), 64 * ns : 64 * (ns+1)] 
                    CTA_list.append((A,B)) 
         #Scheduler
-        result_list = Scheduler(CTA_list, number_of_MS,number_of_CTA_per_MS,scheduling_protocol)
+        result_list = Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster,number_of_CTA_per_MS,scheduling_protocol)
         C_padded = result_reordering(result_list,n_ms,n_ks,n_ns,64,64)
         for x in range(initial_x1, x1):
             for y in range(initial_y2, y2):
@@ -192,7 +192,7 @@ def Tiling2D(tensor1, tensor2, number_of_MS, number_of_CTA_per_MS, scheduling_pr
                    B = tensor2_padded[8*ks : 8*(ks +1), 32 * ns : 32 * (ns+1)] 
                    CTA_list.append((A,B)) 
         #Scheduler
-        result_list = Scheduler(CTA_list, number_of_MS,number_of_CTA_per_MS,scheduling_protocol)
+        result_list = Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster,number_of_CTA_per_MS,scheduling_protocol)
         C_padded = result_reordering(result_list,n_ms,n_ks,n_ns,32,32)
         for x in range(initial_x1, x1):
             for y in range(initial_y2, y2):
@@ -212,7 +212,7 @@ def Tiling2D(tensor1, tensor2, number_of_MS, number_of_CTA_per_MS, scheduling_pr
                    B = tensor2_padded[8*ks : 8*(ks +1), 16 * ns : 16 * (ns+1)] 
                    CTA_list.append((A,B)) 
         #Scheduler
-        result_list = Scheduler(CTA_list, number_of_MS,number_of_CTA_per_MS,scheduling_protocol)
+        result_list = Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster,number_of_CTA_per_MS,scheduling_protocol)
         C_padded = result_reordering(result_list,n_ms,n_ks,n_ns,16,16)
         for x in range(initial_x1, x1):
             for y in range(initial_y2, y2):

@@ -3,9 +3,38 @@ import torch
 import math
 import threading
 import sys
+lock =threading.Lock()
+x = 512
+def div_by_2():
+    global x,lock
+    lock.acquire()
+    while(x > 1):
+        x = x/2
+        print(x)
+    lock.release()
+
+def mul_by_2():
+    global x,lock
+    lock.acquire()
+    while(x < 512*2*2*2):
+        x = x*2
+        print(x)
+    lock.release()
+
+    
+
+
+t1 = threading.Thread(target=div_by_2)
+t2 = threading.Thread(target=mul_by_2)
+
+t2.start()
+t1.start()
 
 
 
+
+
+sys.exit()
 print(int(116850/4))
 print(116850 % 4)
 print(116850- int(116850/4)* 4)
