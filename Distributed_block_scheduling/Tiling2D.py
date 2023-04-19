@@ -77,7 +77,7 @@ def Tiling2D(tensor1, tensor2, number_of_MS, number_of_CTA_per_MS, scheduling_pr
         print("Error invalid matrix dimentions for multiplication afther padding \n")
         return torch.zeros(x1,y2)
     
-    print("Paded dim x1 : " + str(x1)+ "\n Padded dim y1 : "+ str(y1)+ "\n Padded x2 : "+ str(x2)+ "\n Padded y2 : " +str(y2)+ " \n")
+    #print("Paded dim x1 : " + str(x1)+ "\n Padded dim y1 : "+ str(y1)+ "\n Padded x2 : "+ str(x2)+ "\n Padded y2 : " +str(y2)+ " \n")
 
     #I have to decide the blocks size according to CUTLASS strategies of block sizing
     if(((x1 % 128) == 0) and ((y2 % 128) == 0)):
@@ -200,12 +200,10 @@ def Tiling2D(tensor1, tensor2, number_of_MS, number_of_CTA_per_MS, scheduling_pr
                     print("External non zero value  \n")
         return C_padded[0: initial_x1, 0 : initial_y2]
     elif(strategy == "Small"):
-        print("EXE Small \n")
+        
         n_ms = int(x1/16)
         n_ks = int(y1/8)
         n_ns = int(y2/16)
-
-        print("n_ms : " + str(n_ms)+ "\n n_ks : " + str(n_ks) + "\n n_ns : " + str(n_ns)+ "\n")
 
         for ms in range(n_ms):
            for ns in range(n_ns):
@@ -214,7 +212,6 @@ def Tiling2D(tensor1, tensor2, number_of_MS, number_of_CTA_per_MS, scheduling_pr
                    B = tensor2_padded[8*ks : 8*(ks +1), 16 * ns : 16 * (ns+1)] 
                    CTA_list.append((A,B)) 
         #Scheduler
-        print( "len touples list : " + str(len(CTA_list)) + "\n")
         result_list = Scheduler(CTA_list, number_of_MS,number_of_CTA_per_MS,scheduling_protocol)
         C_padded = result_reordering(result_list,n_ms,n_ks,n_ns,16,16)
         for x in range(initial_x1, x1):
