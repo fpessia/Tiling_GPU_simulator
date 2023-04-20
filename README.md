@@ -12,3 +12,6 @@ DISTRIBUTED BLOCK SCHEDULER
 DISTRIBUTED CTA SCHEDULER 
 
 -Distributed CTA passed 100 % over 20 test with error range 0.001
+
+GREEDY-CLUSTERING-SCHEDULER
+- greedy-clustering scheduler passed  100 % over 20 test with error range 0.001

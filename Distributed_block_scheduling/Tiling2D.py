@@ -202,14 +202,14 @@ def Tiling2D(tensor1, tensor2,number_of_cluster, number_of_MS_per_cluster, numbe
     elif(strategy == "Small"):
         
         n_ms = int(x1/16)
-        n_ks = int(y1/8)
+        n_ks = int(y1/16)
         n_ns = int(y2/16)
-
+        
         for ms in range(n_ms):
            for ns in range(n_ns):
                for ks in range(n_ks):
-                   A = tensor1_padded[16* ms : 16*(ms+1), 8*ks : 8*(ks +1)]
-                   B = tensor2_padded[8*ks : 8*(ks +1), 16 * ns : 16 * (ns+1)] 
+                   A = tensor1_padded[16* ms : 16*(ms+1), 16*ks : 16*(ks +1)]
+                   B = tensor2_padded[16*ks : 16*(ks +1), 16 * ns : 16 * (ns+1)] 
                    CTA_list.append((A,B)) 
         #Scheduler
         result_list = Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster,number_of_CTA_per_MS,scheduling_protocol)

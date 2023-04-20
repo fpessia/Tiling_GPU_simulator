@@ -4,6 +4,13 @@ import math
 import threading
 import sys
 
+
+
+print(math.ceil(1.2))
+
+
+
+sys.exit()
 ll = []
 ll.append([])
 print(ll)

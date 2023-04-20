@@ -13,7 +13,7 @@ for i in range(20):
     B = torch.randn(common_dim,random.randint(0 , 1000))
      
     C = torch.matmul(A,B)
-    C_tilde = Tiling2D(A,B,num_of_cluster,num_of_MS_per_cluster,num_of_CTA_per_MS,"Distributed_CTA")
+    C_tilde = Tiling2D(A,B,num_of_cluster,num_of_MS_per_cluster,num_of_CTA_per_MS,"Greedy-Clustering")
 
     err = C - C_tilde
     passed_test = True
@@ -28,9 +28,9 @@ for i in range(20):
         print("Test passed \n")
     else:
         print("Test failed \n")
-        #print(C)
-        #print("\n\n")
-        #print(C_tilde)
+        print(C)
+        print("\n\n")
+        print(C_tilde)
         break
         
 acc = 100* n_correct/20  
