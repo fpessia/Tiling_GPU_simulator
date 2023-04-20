@@ -3,6 +3,7 @@ import threading
 from Distributed_block_scheduler import Distributed_block_scheduler
 from Distributed_CTA_scheduler import Distributed_CTA_scheduler
 from Greedy_clustering_scheduler import Greedy_clustering_scheduler
+from Global_Round_Robin_scheduler import Global_Round_Robin_scheduler
 
 def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CTAs_per_MS, scheduling_protocol):
     
@@ -144,9 +145,49 @@ def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CT
         
         return result_list
 
-                    
-                
-   
+    elif(scheduling_protocol == "Global-round-robin"):
+        to_schedule_CTAs_per_cluster = []
+        for c in range(number_of_cluster):
+            to_schedule_CTAs_per_cluster.append([])
+
+        scheduled_CTA = 0
+        cluster = 0
+        sm_counter = 0
+
+        while(scheduled_CTA < n_CTA):
+            if (scheduled_CTA < (number_of_cluster*number_of_MS_per_cluster*number_of_MS_per_cluster)):
+                if(sm_counter < number_of_MS_per_cluster):
+                    to_schedule_CTAs_per_cluster[cluster].append(scheduled_CTA)
+                    sm_counter += 1
+                    scheduled_CTA += 1
+                else :
+                    cluster += 1
+                    if(cluster == number_of_cluster):
+                        cluster = 0
+                    sm_counter = 0
+                    to_schedule_CTAs_per_cluster[cluster].append(scheduled_CTA)
+                    scheduled_CTA += 1
+            else:
+                if(scheduled_CTA == (number_of_cluster*number_of_MS_per_cluster*number_of_MS_per_cluster)):
+                    cluster = 0
+                to_schedule_CTAs_per_cluster[cluster].append(scheduled_CTA)
+                cluster += 1
+                scheduled_CTA += 1
+                if(cluster == number_of_cluster):
+                    cluster = 0
+        
+        for c in range(number_of_cluster):
+            cluster_thread.append(threading.Thread(target=Global_Round_Robin_scheduler, args=(CTA_list,to_schedule_CTAs_per_cluster[c],
+                                                                                              number_of_MS_per_cluster,number_of_CTAs_per_MS,
+                                                                                              result_list)     ))
+        for c in range(number_of_cluster):
+            cluster_thread[c].start()
+        for c in range(number_of_cluster):
+            cluster_thread[c].join()
+        return result_list
+
+
+  
     else: 
         print("Not implemented protocol")
 

@@ -13,7 +13,7 @@ for i in range(20):
     B = torch.randn(common_dim,random.randint(0 , 1000))
      
     C = torch.matmul(A,B)
-    C_tilde = Tiling2D(A,B,num_of_cluster,num_of_MS_per_cluster,num_of_CTA_per_MS,"Greedy-Clustering")
+    C_tilde = Tiling2D(A,B,num_of_cluster,num_of_MS_per_cluster,num_of_CTA_per_MS,"Global-round-robin")
 
     err = C - C_tilde
     passed_test = True

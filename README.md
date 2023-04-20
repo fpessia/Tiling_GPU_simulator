@@ -15,3 +15,5 @@ DISTRIBUTED CTA SCHEDULER
 
 GREEDY-CLUSTERING-SCHEDULER
 - greedy-clustering scheduler passed  100 % over 20 test with error range 0.001
+
+GLOBAL ROUND ROBIN SCHEDULER
