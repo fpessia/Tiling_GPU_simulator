@@ -4,7 +4,10 @@ import threading
 from Greedy_clustering_scheduler import MS_Greedy_clustering_scheduler
 
 
-def Global_Round_Robin_scheduler(CTA_list, to_schedule_CTA_for_this_cluster, number_of_MS_per_cluster,number_of_CTA_per_MS, result_list):
+
+
+
+def Two_level_Round_Robin_scheduler(CTA_list, to_schedule_CTA_for_this_cluster,number_of_CTA_per_MS, number_of_MS_per_cluster, result_list):
     to_schedule_CTAs_per_MS = []
     index_list = []
     matrix_block_list = []

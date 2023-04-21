@@ -3,7 +3,9 @@ import threading
 from Scheduler import Scheduler
 
 
+schedule_protocols = ["Distributed_block","Distributed_CTA","Greedy-Clustering","Global-round-robin","Two-level-round-robin"]
 tiling_strategies = [ "Not defined","Small", "Medium", "Large", "Tall", "Wide", "Huge"]
+
 
 def zero_padding(tensor, x_init, y_init):
     
