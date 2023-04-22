@@ -216,7 +216,10 @@ def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CT
                     cluster = 0
                     dynamic_scheduled_row += 1
                     stocastic_ordering = []
-                    random_delay_generator_simulator(stocastic_ordering,number_of_cluster)
+
+                    stocastic_ordering= random_delay_generator_simulator(stocastic_ordering,number_of_cluster)
+                    
+            
                     to_schedule_CTAs_per_cluster[stocastic_ordering[cluster]].append(scheduled_CTA)
                     scheduled_CTA +=1
                     cluster += 1
@@ -226,9 +229,6 @@ def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CT
                     cluster += 1
                     if(cluster == number_of_cluster):
                         cluster = 0
-
-                    
-
 
         for c in range(number_of_cluster):
             cluster_thread.append(threading.Thread(target=Two_level_Round_Robin_scheduler, args=(CTA_list,to_schedule_CTAs_per_cluster[c],

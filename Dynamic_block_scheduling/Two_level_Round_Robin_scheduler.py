@@ -38,23 +38,20 @@ def Two_level_Round_Robin_scheduler(CTA_list, to_schedule_CTA_for_this_cluster,n
                 dynamic_row_scheduled += 1
                 ms = 0
                 stocastic_ordering = []
-                random_delay_generator_simulator(stocastic_ordering,number_of_MS_per_cluster)
-                to_schedule_CTAs_per_MS[stocastic_ordering[ms]].append(scheduled_CTA)
+                stocastic_ordering = random_delay_generator_simulator(stocastic_ordering,number_of_MS_per_cluster)
+
+                to_schedule_CTAs_per_MS[stocastic_ordering[ms]].append(to_schedule_CTA_for_this_cluster[scheduled_CTA])
                 ms += 1
                 scheduled_CTA += 1
             else:
-                to_schedule_CTAs_per_MS[stocastic_ordering[ms]].append(scheduled_CTA)
+                to_schedule_CTAs_per_MS[stocastic_ordering[ms]].append(to_schedule_CTA_for_this_cluster[scheduled_CTA])
                 scheduled_CTA += 1
                 ms += 1
                 if ms == number_of_MS_per_cluster:
                     ms = 0
+    
 
 
-
-    
-    
-    
-    
     MS_threads = []
   
 
