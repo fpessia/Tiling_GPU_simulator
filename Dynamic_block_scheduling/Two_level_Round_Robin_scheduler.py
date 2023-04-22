@@ -2,16 +2,20 @@ import torch
 import math
 import threading 
 from Greedy_clustering_scheduler import MS_Greedy_clustering_scheduler
+from Delay_generator import random_delay_generator_simulator
 
 
 
 
 
 def Two_level_Round_Robin_scheduler(CTA_list, to_schedule_CTA_for_this_cluster,number_of_CTA_per_MS, number_of_MS_per_cluster, result_list):
+    
     to_schedule_CTAs_per_MS = []
     index_list = []
     matrix_block_list = []
     CTAs_of_cluster = len(to_schedule_CTA_for_this_cluster)
+    static_scheduled_CTAs = number_of_CTA_per_MS*number_of_MS_per_cluster
+    stocastic_ordering = []
 
     for ms in range(number_of_MS_per_cluster):
         to_schedule_CTAs_per_MS.append([])
@@ -20,13 +24,37 @@ def Two_level_Round_Robin_scheduler(CTA_list, to_schedule_CTA_for_this_cluster,n
     
     scheduled_CTA = 0
     ms = 0
+    dynamic_row_scheduled = 0
 
     while(scheduled_CTA < CTAs_of_cluster):
-        to_schedule_CTAs_per_MS[ms].append(to_schedule_CTA_for_this_cluster[scheduled_CTA])
-        ms += 1
-        if (ms == number_of_MS_per_cluster):
-            ms = 0
-        scheduled_CTA += 1
+        if(scheduled_CTA < static_scheduled_CTAs):
+            to_schedule_CTAs_per_MS[ms].append(to_schedule_CTA_for_this_cluster[scheduled_CTA])
+            ms += 1
+            if (ms == number_of_MS_per_cluster):
+                ms = 0
+            scheduled_CTA += 1
+        else: #dynamic schedeling
+            if(scheduled_CTA == static_scheduled_CTAs+dynamic_row_scheduled*number_of_MS_per_cluster):
+                dynamic_row_scheduled += 1
+                ms = 0
+                stocastic_ordering = []
+                random_delay_generator_simulator(stocastic_ordering,number_of_MS_per_cluster)
+                to_schedule_CTAs_per_MS[stocastic_ordering[ms]].append(scheduled_CTA)
+                ms += 1
+                scheduled_CTA += 1
+            else:
+                to_schedule_CTAs_per_MS[stocastic_ordering[ms]].append(scheduled_CTA)
+                scheduled_CTA += 1
+                ms += 1
+                if ms == number_of_MS_per_cluster:
+                    ms = 0
+
+
+
+    
+    
+    
+    
     MS_threads = []
   
 
