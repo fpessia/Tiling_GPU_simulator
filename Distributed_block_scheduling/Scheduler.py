@@ -223,5 +223,3 @@ def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CT
 
         
 
-
-    

@@ -5,6 +5,7 @@ from Distributed_CTA_scheduler import Distributed_CTA_scheduler
 from Greedy_clustering_scheduler import Greedy_clustering_scheduler
 from Global_Round_Robin_scheduler import Global_Round_Robin_scheduler
 from Two_level_Round_Robin_scheduler import Two_level_Round_Robin_scheduler
+from Delay_generator import random_delay_generator_simulator
 
 def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CTAs_per_MS, scheduling_protocol):
     
@@ -191,19 +192,42 @@ def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CT
 
     elif(scheduling_protocol == "Two-level-round-robin"):
         to_schedule_CTAs_per_cluster = []
+        number_of_static_CTAs = number_of_cluster*number_of_MS_per_cluster*number_of_CTAs_per_MS
         
         for c in range(number_of_cluster):
             to_schedule_CTAs_per_cluster.append([])
         
         scheduled_CTA = 0
         cluster = 0
+        dynamic_scheduled_row = 0
+        stocastic_ordering = []
+        stocastic_counter = 0
 
         while(scheduled_CTA < n_CTA):
-            to_schedule_CTAs_per_cluster[cluster].append(scheduled_CTA)
-            cluster += 1
-            scheduled_CTA += 1
-            if(cluster == number_of_cluster):
-                cluster = 0
+            if(scheduled_CTA < number_of_static_CTAs):
+                to_schedule_CTAs_per_cluster[cluster].append(scheduled_CTA)
+                cluster += 1
+                scheduled_CTA += 1
+                if(cluster == number_of_cluster):
+                    cluster = 0
+            else : #dynamic scheduling
+                if(scheduled_CTA == dynamic_scheduled_row*number_of_MS_per_cluster*number_of_cluster+ number_of_static_CTAs):
+                    stocastic_counter = 0
+                    dynamic_scheduled_row += 1
+                    stocastic_ordering = []
+                    random_delay_generator_simulator(stocastic_ordering,number_of_cluster)
+                    to_schedule_CTAs_per_cluster[stocastic_ordering[stocastic_counter]].append(scheduled_CTA)
+                    scheduled_CTA +=1
+                    stocastic_counter += 1
+                else : 
+                    to_schedule_CTAs_per_cluster[stocastic_ordering[stocastic_counter]].append(scheduled_CTA)
+                    scheduled_CTA += 1
+                    stocastic_counter += 1
+                    if(stocastic_counter == number_of_cluster):
+                        stocastic_counter = 0
+
+                    
+
 
         for c in range(number_of_cluster):
             cluster_thread.append(threading.Thread(target=Two_level_Round_Robin_scheduler, args=(CTA_list,to_schedule_CTAs_per_cluster[c],
