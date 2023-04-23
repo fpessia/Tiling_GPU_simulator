@@ -17,7 +17,7 @@ for schedule in range(1):#len(schedule_protocols)
         B = torch.randn(common_dim,random.randint(0 , 1000))
      
         C = torch.matmul(A,B)
-        C_tilde = Tiling2D(A,B,num_of_cluster,num_of_MS_per_cluster,num_of_CTA_per_MS,"Two-level-round-robin")#schedule_protocols[schedule]
+        C_tilde = Tiling2D(A,B,num_of_cluster,num_of_MS_per_cluster,num_of_CTA_per_MS,"Global-round-robin")#schedule_protocols[schedule]
 
         err = C - C_tilde
         passed_test = True

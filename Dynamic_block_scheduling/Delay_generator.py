@@ -13,7 +13,6 @@ def random_delay_generator_simulator(input_list, l):
             input_list.remove(input_list[element])
         else:
             output_list.append(input_list[0])
-   
     
     return output_list
 

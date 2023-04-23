@@ -2,6 +2,7 @@ import torch
 import math
 import threading 
 from Greedy_clustering_scheduler import MS_Greedy_clustering_scheduler
+from Delay_generator import random_delay_generator_simulator
 
 
 def Global_Round_Robin_scheduler(CTA_list, to_schedule_CTA_for_this_cluster, number_of_MS_per_cluster,number_of_CTA_per_MS, result_list):
@@ -15,15 +16,34 @@ def Global_Round_Robin_scheduler(CTA_list, to_schedule_CTA_for_this_cluster, num
         index_list.append([])
         matrix_block_list.append([])
     
+
+    number_of_static_CTAs = number_of_MS_per_cluster*number_of_CTA_per_MS
     scheduled_CTA = 0
     ms = 0
 
+    dynamic_scheduled_row = 0
+    stocastic_ordering = []
+
     while(scheduled_CTA < CTAs_of_cluster):
-        to_schedule_CTAs_per_MS[ms].append(to_schedule_CTA_for_this_cluster[scheduled_CTA])
-        ms += 1
-        if (ms == number_of_MS_per_cluster):
-            ms = 0
-        scheduled_CTA += 1
+        if scheduled_CTA < number_of_static_CTAs :
+            to_schedule_CTAs_per_MS[ms].append(to_schedule_CTA_for_this_cluster[scheduled_CTA])
+            ms += 1
+            if (ms == number_of_MS_per_cluster):
+                ms = 0
+            scheduled_CTA += 1
+        else : #dynamic scheduler
+            if(scheduled_CTA == (number_of_static_CTAs + dynamic_scheduled_row*number_of_MS_per_cluster)):
+                ms = 0
+                stocastic_ordering = []
+                stocastic_ordering = random_delay_generator_simulator(stocastic_ordering, number_of_MS_per_cluster)
+            to_schedule_CTAs_per_MS[stocastic_ordering[ms]].append(to_schedule_CTA_for_this_cluster[scheduled_CTA])
+            ms += 1
+            scheduled_CTA += 1 
+            if ms == number_of_MS_per_cluster : 
+                ms = 0
+                dynamic_scheduled_row += 1
+
+    
     MS_threads = []
   
 
