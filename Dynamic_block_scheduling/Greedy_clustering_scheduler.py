@@ -2,6 +2,7 @@ import torch
 import math
 import threading 
 from MS import MS_simulator_uncontiguos_index
+from Delay_generator import random_delay_generator_simulator
 
 
 def MS_Greedy_clustering_scheduler(matrix_block_list,result_list, index_list):
@@ -25,13 +26,42 @@ def Greedy_clustering_scheduler(CTA_list,to_schedule_CTA_for_this_cluster,number
     
     scheduled_CTA = 0
     ms = 0
+    num_of_static_scheduled = number_of_MS_per_cluster*number_of_CTA_per_MS
+
+    stocastic_order = []
+    dynamic_block = 0
+    dynamic_block_counter = 0
 
     while(scheduled_CTA < CTAs_of_cluster):
-        to_schedule_CTAs_per_MS[ms].append(to_schedule_CTA_for_this_cluster[scheduled_CTA])
-        ms += 1
-        if (ms == number_of_MS_per_cluster):
-            ms = 0
-        scheduled_CTA += 1
+        if(scheduled_CTA < num_of_static_scheduled):
+            to_schedule_CTAs_per_MS[ms].append(to_schedule_CTA_for_this_cluster[scheduled_CTA])
+            ms += 1
+            if (ms == number_of_MS_per_cluster):
+                ms = 0
+            scheduled_CTA += 1
+        else : #dynamic scheduling
+            if(scheduled_CTA == num_of_static_scheduled+dynamic_block*num_of_static_scheduled):
+                ms = 0
+                dynamic_block_counter = 0
+                stocastic_order = []
+                diff = CTAs_of_cluster - scheduled_CTA
+                if (diff < num_of_static_scheduled):
+                    stocastic_order = random_delay_generator_simulator(stocastic_order, diff)
+                else:
+                    stocastic_order = random_delay_generator_simulator(stocastic_order, num_of_static_scheduled)
+            
+            to_schedule_CTAs_per_MS[ms].append(to_schedule_CTA_for_this_cluster[num_of_static_scheduled+dynamic_block*num_of_static_scheduled+
+                                                                                stocastic_order[dynamic_block_counter]])
+            ms += 1
+            if ms == number_of_MS_per_cluster:
+                ms = 0
+            dynamic_block_counter += 1
+            scheduled_CTA += 1
+            if(dynamic_block_counter == num_of_static_scheduled):
+                dynamic_block_counter = 0
+                dynamic_block += 1
+            
+
     MS_threads = []
   
 

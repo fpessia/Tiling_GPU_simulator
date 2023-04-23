@@ -107,9 +107,14 @@ def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CT
     elif(scheduling_protocol == "Greedy-Clustering"):
         num_of_CTA_in_cluster = number_of_CTAs_per_MS*number_of_MS_per_cluster
         total_num_of_CTA = num_of_CTA_in_cluster * number_of_cluster
+        
         to_schedule_CTAs_per_cluster = []
         scheduled_CTA = 0
         cluster = 0
+        block_counter = 0
+
+        stocastic_ordering = []
+        dynamic_cluster_filled = 0
 
         for c in range(number_of_cluster):
             to_schedule_CTAs_per_cluster.append([])
@@ -123,20 +128,29 @@ def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CT
                     cluster +=1
                     to_schedule_CTAs_per_cluster[cluster].append(scheduled_CTA)
                     scheduled_CTA += 1
-            else : 
-                if(scheduled_CTA == total_num_of_CTA):
+            else : # dynamic scheduling
+                if(scheduled_CTA == total_num_of_CTA+dynamic_cluster_filled*total_num_of_CTA):
                     cluster = 0
-                    to_schedule_CTAs_per_cluster[cluster].append(scheduled_CTA)
-                    cluster += 1
+                    stocastic_ordering = []
+                    stocastic_ordering = random_delay_generator_simulator(stocastic_ordering,number_of_cluster)
+                    to_schedule_CTAs_per_cluster[stocastic_ordering[cluster]].append(scheduled_CTA)
                     scheduled_CTA += 1
-                else:
-                    to_schedule_CTAs_per_cluster[cluster].append(scheduled_CTA)
+                    block_counter += 1
+                    if(block_counter == num_of_CTA_in_cluster):
+                        block_counter = 0
+                        cluster += 1
+                else : 
+                    to_schedule_CTAs_per_cluster[stocastic_ordering[cluster]].append(scheduled_CTA)
                     scheduled_CTA += 1
-                    cluster += 1
-                    if(cluster == number_of_cluster):
+                    block_counter += 1
+                    if(block_counter == num_of_CTA_in_cluster):
+                        block_counter = 0
+                        cluster += 1
+                    if cluster == number_of_cluster : 
                         cluster = 0
-    
-        
+                        dynamic_cluster_filled += 1
+
+
         for c in range(number_of_cluster):
             cluster_thread.append(threading.Thread(target=Greedy_clustering_scheduler, args=(CTA_list,to_schedule_CTAs_per_cluster[c],
                                                                                              number_of_MS_per_cluster,number_of_CTAs_per_MS,
