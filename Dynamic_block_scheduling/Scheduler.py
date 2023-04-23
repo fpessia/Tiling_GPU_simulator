@@ -38,15 +38,38 @@ def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CT
             ms_index = 0
             scheduled_CTA = 0
 
+            number_of_static_CTAs = number_of_MS_per_cluster*number_of_CTAs_per_MS
+            
+
+
             while(scheduled_CTA < to_schedule_CTAs_per_cluster[c]):
-                n_CTA_for_current_MS = number_of_CTAs_per_MS
-                if((to_schedule_CTAs_per_cluster[c]- scheduled_CTA) < number_of_CTAs_per_MS):
-                    n_CTA_for_current_MS = to_schedule_CTAs_per_cluster[c]- scheduled_CTA
-                to_schedule_CTAs_per_MS.append((ms_index,scheduled_CTA,n_CTA_for_current_MS)) 
-                ms_index += 1
-                if(ms_index == number_of_MS_per_cluster):
-                    ms_index = 0
-                scheduled_CTA += number_of_CTAs_per_MS
+                if(scheduled_CTA < number_of_static_CTAs or scheduled_CTA+number_of_MS_per_cluster*number_of_CTAs_per_MS > to_schedule_CTAs_per_cluster[c]):
+                    n_CTA_for_current_MS = number_of_CTAs_per_MS
+                    if((to_schedule_CTAs_per_cluster[c]- scheduled_CTA) < number_of_CTAs_per_MS):
+                        n_CTA_for_current_MS = to_schedule_CTAs_per_cluster[c]- scheduled_CTA
+                    to_schedule_CTAs_per_MS.append((ms_index,scheduled_CTA,n_CTA_for_current_MS)) 
+                    ms_index += 1
+                    if(ms_index == number_of_MS_per_cluster):
+                        ms_index = 0
+                    scheduled_CTA += number_of_CTAs_per_MS
+                else : #dynamic sheduler
+                    
+                    stocastic_ordering = []
+                    stocastic_ordering = random_delay_generator_simulator(stocastic_ordering, number_of_MS_per_cluster)
+                    
+                    for ms in range(number_of_MS_per_cluster):
+                        pos = 0
+                        while(ms != stocastic_ordering[pos]):
+                            pos += 1
+                        to_schedule_CTAs_per_MS.append((ms_index, scheduled_CTA+pos*number_of_CTAs_per_MS , number_of_CTAs_per_MS))
+                    scheduled_CTA += number_of_CTAs_per_MS * number_of_MS_per_cluster
+                    
+
+
+
+
+            
+            
             
             init_index = 0
             for k in range(c):
