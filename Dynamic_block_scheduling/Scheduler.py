@@ -82,13 +82,37 @@ def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CT
             ms_index = 0
             scheduled_CTA = 0
 
+            number_of_static_CTAs = number_of_MS_per_cluster*number_of_CTAs_per_MS
+            stocastic_ordering = []
+            dynamic_scheduled_row = 0
+
             while(scheduled_CTA < to_schedule_CTAs_per_cluster[c]):
-                to_schedule_CTAs_per_MS.append((ms_index,scheduled_CTA, 1))
-                scheduled_CTA += 1
-                ms_index += 1
-                if ms_index == number_of_MS_per_cluster:
-                    ms_index = 0
-            
+                if(scheduled_CTA < number_of_static_CTAs):
+                    to_schedule_CTAs_per_MS.append((ms_index,scheduled_CTA, 1))
+                    scheduled_CTA += 1
+                    ms_index += 1
+                    if ms_index == number_of_MS_per_cluster:
+                        ms_index = 0
+                else : #dynamic scheduler
+                    if(scheduled_CTA == number_of_static_CTAs + dynamic_scheduled_row*number_of_MS_per_cluster):
+                        stocastic_ordering = []
+                        stocastic_ordering = random_delay_generator_simulator(stocastic_ordering,number_of_MS_per_cluster)
+                        ms_index = 0
+                        to_schedule_CTAs_per_MS.append((stocastic_ordering[ms_index],scheduled_CTA,1))
+                        ms_index += 1
+                        scheduled_CTA += 1
+                        if(ms_index == number_of_MS_per_cluster):
+                            ms_index = 0 
+                            dynamic_scheduled_row += 1
+                    else :
+                        to_schedule_CTAs_per_MS.append((stocastic_ordering[ms_index],scheduled_CTA,1))
+                        scheduled_CTA += 1
+                        ms_index += 1
+                        if(ms_index == number_of_MS_per_cluster):
+                            ms_index = 0
+                            dynamic_scheduled_row += 1
+
+
             init_index = 0
             for k in range(c):
                 init_index += to_schedule_CTAs_per_cluster[k]
