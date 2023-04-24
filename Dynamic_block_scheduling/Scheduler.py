@@ -63,13 +63,7 @@ def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CT
                             pos += 1
                         to_schedule_CTAs_per_MS.append((ms_index, scheduled_CTA+pos*number_of_CTAs_per_MS , number_of_CTAs_per_MS))
                     scheduled_CTA += number_of_CTAs_per_MS * number_of_MS_per_cluster
-                    
-
-
-
-
-            
-            
+                          
             
             init_index = 0
             for k in range(c):

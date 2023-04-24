@@ -1,5 +1,6 @@
 import torch
 import random
+import numpy
 from Tiling2D import Tiling2D
 from Tiling2D import schedule_protocols
 
@@ -16,7 +17,7 @@ for schedule in range(len(schedule_protocols)):#
         A = torch.randn(random.randint(0 , 1000),common_dim)
         B = torch.randn(common_dim,random.randint(0 , 1000))
      
-        C = torch.matmul(A,B)
+        C =  torch.from_numpy(numpy.matmul(A.numpy(),B.numpy()))# torch.matmul(A,B)
         C_tilde = Tiling2D(A,B,num_of_cluster,num_of_MS_per_cluster,num_of_CTA_per_MS,schedule_protocols[schedule])#
 
         err = C - C_tilde
@@ -24,7 +25,7 @@ for schedule in range(len(schedule_protocols)):#
         x,y = C_tilde.size()
         for i in range(x):
             for j in range(y):
-                if err[i][j] >= 0.001 or err[i][j] <= -0.001:
+                if err[i][j] >= 0.0001 or err[i][j] <= -0.0001:
                     passed_test = False
 
         if(passed_test):

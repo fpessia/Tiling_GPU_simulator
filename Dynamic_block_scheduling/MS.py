@@ -1,9 +1,12 @@
 import torch
 import threading
+import numpy
 
 
 def MS_executor(A,B,result,CTA_number):
-    result[CTA_number] = torch.matmul(A,B)
+
+    result[CTA_number] = torch.from_numpy(numpy.matmul(A.numpy(),B.numpy()))
+    #result[CTA_number] = torch.matmul(A,B)
 
 
 def MS_simulator_contiguos_index(input, number_of_CTAs_per_MS,result,initial_index): #result is a list for by reference
