@@ -8,25 +8,28 @@ schedule_protocols = ["Distributed_block","Distributed_CTA","Greedy-Clustering",
 tiling_strategies = [ "Not defined","Small", "Medium", "Large", "Tall", "Wide", "Huge"]
 
 
-def zero_padding(tensor, x_init, y_init):
+def zero_padding(tensor, x_init, y_init,tiling):
+
+    if( tiling == 0 or (tiling !=  128 and tiling != 64 and tiling != 32 and tiling != 16)):
+        tiling = 16
     
     x = x_init
     y = y_init
 
-    if(x < 16) :
-        x = 16
-    if(y < 16):
-        y = 16
+    if(x < tiling) :
+        x = tiling
+    if(y < tiling):
+        y = tiling
 
-    mod_x = x % 16  #the matrix must have dimentions that are multiples of 16 otherwise I cannot properly slice into blocks
-    mod_y = y % 16
+    mod_x = x % tiling  #the matrix must have dimentions that are multiples of 16 otherwise I cannot properly slice into blocks
+    mod_y = y % tiling
 
     if( mod_x != 0):
-        while((x % 16) != 0):
+        while((x % tiling) != 0):
             x += 1
 
     if( mod_y != 0):
-        while((y % 16) != 0):
+        while((y % tiling) != 0):
             y += 1
 
     tensor_padded = torch.zeros(x, y)
@@ -55,7 +58,7 @@ def result_reordering(result_list,n_ms,n_ks,n_ns, x_space, y_space):
 
 
 
-def Tiling2D(tensor1, tensor2,number_of_cluster, number_of_MS_per_cluster, number_of_CTA_per_MS, scheduling_protocol,faulty_MS = -1, block_executed_by_fauly_MS = None):
+def Tiling2D(tensor1, tensor2,number_of_cluster, number_of_MS_per_cluster, number_of_CTA_per_MS, scheduling_protocol,tiling = 0,faulty_MS = -1, block_executed_by_fauly_MS = None):
     x1,y1 = tensor1.size()
     x2,y2 = tensor2.size()
     
@@ -77,9 +80,9 @@ def Tiling2D(tensor1, tensor2,number_of_cluster, number_of_MS_per_cluster, numbe
     strategy = tiling_strategies[0]
 
     #Zero padding
-    tensor1_padded = zero_padding(tensor1, x1, y1)
+    tensor1_padded = zero_padding(tensor1, x1, y1,tiling)
     x1,y1 = tensor1_padded.size()
-    tensor2_padded = zero_padding(tensor2, x2, y2)
+    tensor2_padded = zero_padding(tensor2, x2, y2,tiling)
     x2,y2 = tensor2_padded.size()
 
     if( y1 != x2):
@@ -101,6 +104,18 @@ def Tiling2D(tensor1, tensor2,number_of_cluster, number_of_MS_per_cluster, numbe
         strategy = tiling_strategies[2]
     elif((x1 % 16) == 0 and (y2 % 16)== 0):
         strategy = tiling_strategies[1]
+
+    if(tiling != 0): #if user didnt select automatic optimized tiling
+        if(tiling == 128):
+            strategy = tiling_strategies[6]
+        elif(tiling == 64):
+            strategy = tiling_strategies[3]
+        elif(tiling == 32):
+            strategy = tiling_strategies[2]
+        elif(tiling == 16):
+            strategy = tiling_strategies[1]
+
+
 
     CTA_list = []
     if(strategy == "Huge"): 

@@ -20,7 +20,7 @@ for schedule in range(len(schedule_protocols)):#
      
         C =  torch.from_numpy(numpy.matmul(A.numpy(),B.numpy()))# torch.matmul(A,B)
         faulty_BLOCK = [] 
-        C_tilde = Tiling2D(A,B,num_of_cluster,num_of_MS_per_cluster,num_of_CTA_per_MS,schedule_protocols[schedule], -1, faulty_BLOCK)
+        C_tilde = Tiling2D(A,B,num_of_cluster,num_of_MS_per_cluster,num_of_CTA_per_MS,schedule_protocols[schedule],0, -1, faulty_BLOCK)
 
         err = C - C_tilde
         passed_test = True
@@ -37,7 +37,7 @@ for schedule in range(len(schedule_protocols)):#
             n_correct += 1
             
             #print(faulty_BLOCK)
-            #print("Test passed \n")
+            print("Test passed \n")
         else:
             print("Test failed \n")
             
