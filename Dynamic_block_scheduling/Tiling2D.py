@@ -1,5 +1,6 @@
 import torch
 import threading
+import time
 from Scheduler import Scheduler
 
 
@@ -54,18 +55,24 @@ def result_reordering(result_list,n_ms,n_ks,n_ns, x_space, y_space):
 
 
 
-def Tiling2D(tensor1, tensor2,number_of_cluster, number_of_MS_per_cluster, number_of_CTA_per_MS, scheduling_protocol):
+def Tiling2D(tensor1, tensor2,number_of_cluster, number_of_MS_per_cluster, number_of_CTA_per_MS, scheduling_protocol,faulty_MS = -1, block_executed_by_fauly_MS = None):
     x1,y1 = tensor1.size()
     x2,y2 = tensor2.size()
-
+    
     initial_x1 = x1
     initial_x2 = x2
     initial_y1 = y1
     initial_y2 = y2
-
+    
     if( initial_y1 != initial_x2):
         print("Error invalid matrix dimentions for multiplication \n")
+        time.sleep(5)
         return torch.zeros(x1,y2)
+    if(faulty_MS >= number_of_cluster*number_of_MS_per_cluster):
+        print("Error invalid faulty MS \n")
+        time.sleep(5)
+        return torch.zeros(x1,y2)
+
 
     strategy = tiling_strategies[0]
 
@@ -109,13 +116,10 @@ def Tiling2D(tensor1, tensor2,number_of_cluster, number_of_MS_per_cluster, numbe
                     B = tensor2_padded[8*ks : 8*(ks +1), 128 * ns : 128 * (ns+1)] 
                     CTA_list.append((A,B)) 
         #Scheduler
-        result_list= Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster,number_of_CTA_per_MS,scheduling_protocol)
+        result_list= Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster,number_of_CTA_per_MS,scheduling_protocol,faulty_MS, block_executed_by_fauly_MS)
       
         C_padded = result_reordering(result_list,n_ms,n_ks,n_ns,128,128)
-        for x in range(initial_x1, x1):
-            for y in range(initial_y2, y2):
-                if C_padded[x][y] != 0:
-                    print("External non zero value  \n")
+     
         return C_padded[0: initial_x1, 0 : initial_y2]
 
     elif(strategy == "Wide"):
@@ -131,12 +135,9 @@ def Tiling2D(tensor1, tensor2,number_of_cluster, number_of_MS_per_cluster, numbe
                    B = tensor2_padded[8*ks : 8*(ks +1), 128 * ns : 128 * (ns+1)] 
                    CTA_list.append((A,B)) 
         #Scheduler
-        result_list = Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster,number_of_CTA_per_MS,scheduling_protocol)
+        result_list = Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster,number_of_CTA_per_MS,scheduling_protocol,faulty_MS, block_executed_by_fauly_MS)
         C_padded = result_reordering(result_list,n_ms,n_ks,n_ns,32,128)
-        for x in range(initial_x1, x1):
-            for y in range(initial_y2, y2):
-                if C_padded[x][y] != 0:
-                    print("External non zero value  \n")
+
         return C_padded[0: initial_x1, 0 : initial_y2]
 
     elif(strategy == "Tall"):
@@ -152,12 +153,9 @@ def Tiling2D(tensor1, tensor2,number_of_cluster, number_of_MS_per_cluster, numbe
                    B = tensor2_padded[8*ks : 8*(ks +1), 32 * ns : 32 * (ns+1)] 
                    CTA_list.append((A,B)) 
         #Scheduler
-        result_list = Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster,number_of_CTA_per_MS,scheduling_protocol)
+        result_list = Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster,number_of_CTA_per_MS,scheduling_protocol,faulty_MS, block_executed_by_fauly_MS)
         C_padded = result_reordering(result_list,n_ms,n_ks,n_ns,128,32)
-        for x in range(initial_x1, x1):
-            for y in range(initial_y2, y2):
-                if C_padded[x][y] != 0:
-                    print("External non zero value  \n")
+    
         return C_padded[0: initial_x1, 0 : initial_y2]
 
     elif(strategy == "Large"):
@@ -173,12 +171,9 @@ def Tiling2D(tensor1, tensor2,number_of_cluster, number_of_MS_per_cluster, numbe
                    B = tensor2_padded[8*ks : 8*(ks +1), 64 * ns : 64 * (ns+1)] 
                    CTA_list.append((A,B)) 
         #Scheduler
-        result_list = Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster,number_of_CTA_per_MS,scheduling_protocol)
+        result_list = Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster,number_of_CTA_per_MS,scheduling_protocol,faulty_MS, block_executed_by_fauly_MS)
         C_padded = result_reordering(result_list,n_ms,n_ks,n_ns,64,64)
-        for x in range(initial_x1, x1):
-            for y in range(initial_y2, y2):
-                if C_padded[x][y] != 0:
-                    print("External non zero value  \n")
+    
         return C_padded[0: initial_x1, 0 : initial_y2]
 
     elif(strategy == "Medium"):
@@ -194,12 +189,9 @@ def Tiling2D(tensor1, tensor2,number_of_cluster, number_of_MS_per_cluster, numbe
                    B = tensor2_padded[8*ks : 8*(ks +1), 32 * ns : 32 * (ns+1)] 
                    CTA_list.append((A,B)) 
         #Scheduler
-        result_list = Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster,number_of_CTA_per_MS,scheduling_protocol)
+        result_list = Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster,number_of_CTA_per_MS,scheduling_protocol,faulty_MS, block_executed_by_fauly_MS)
         C_padded = result_reordering(result_list,n_ms,n_ks,n_ns,32,32)
-        for x in range(initial_x1, x1):
-            for y in range(initial_y2, y2):
-                if C_padded[x][y] != 0:
-                    print("External non zero value  \n")
+     
         return C_padded[0: initial_x1, 0 : initial_y2]
     elif(strategy == "Small"):
         
@@ -214,12 +206,9 @@ def Tiling2D(tensor1, tensor2,number_of_cluster, number_of_MS_per_cluster, numbe
                    B = tensor2_padded[16*ks : 16*(ks +1), 16 * ns : 16 * (ns+1)] 
                    CTA_list.append((A,B)) 
         #Scheduler
-        result_list = Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster,number_of_CTA_per_MS,scheduling_protocol)
+        result_list = Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster,number_of_CTA_per_MS,scheduling_protocol,faulty_MS, block_executed_by_fauly_MS)
         C_padded = result_reordering(result_list,n_ms,n_ks,n_ns,16,16)
-        for x in range(initial_x1, x1):
-            for y in range(initial_y2, y2):
-                if C_padded[x][y] != 0:
-                    print("External non zero value  \n")
+      
         return C_padded[0: initial_x1, 0 : initial_y2]
     else:
         print("Padding when wrong since no strategy from the available ones got chosed \n")

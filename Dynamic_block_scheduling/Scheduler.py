@@ -7,7 +7,7 @@ from Global_Round_Robin_scheduler import Global_Round_Robin_scheduler
 from Two_level_Round_Robin_scheduler import Two_level_Round_Robin_scheduler
 from Delay_generator import random_delay_generator_simulator
 
-def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CTAs_per_MS, scheduling_protocol):
+def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CTAs_per_MS, scheduling_protocol,faulty_MS = -1, block_executed_by_fauly_MS= None):
     
     n_CTA = len(CTA_list)
     number_of_static_CTAs = number_of_cluster*number_of_MS_per_cluster*number_of_CTAs_per_MS
@@ -23,6 +23,10 @@ def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CT
 
 
     if(scheduling_protocol == "Distributed_block"):
+
+        faulty_cluster = -1
+        if(faulty_MS != -1):
+            faulty_cluster = int(faulty_MS/number_of_MS_per_cluster)
 
         to_schedule_CTAs_per_cluster = []
         for c in range(number_of_cluster):
@@ -72,9 +76,15 @@ def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CT
             
             
             l = len(to_schedule_CTAs_per_MS) #cannot pass the list by reference
-            cluster_thread.append(threading.Thread(target=Distributed_block_scheduler, args=(CTA_list[init_index: init_index+to_schedule_CTAs_per_cluster[c]],
+            
+            if(faulty_cluster != c):
+                cluster_thread.append(threading.Thread(target=Distributed_block_scheduler, args=(CTA_list[init_index: init_index+to_schedule_CTAs_per_cluster[c]],
                                                                                             to_schedule_CTAs_per_MS[0 : l],number_of_MS_per_cluster,
-                                                                                             number_of_CTAs_per_MS,result_list, init_index)  ))
+                                                                                             number_of_CTAs_per_MS,result_list, init_index,-1, None)  ))
+            else:
+                cluster_thread.append(threading.Thread(target=Distributed_block_scheduler, args=(CTA_list[init_index: init_index+to_schedule_CTAs_per_cluster[c]],
+                                                                                            to_schedule_CTAs_per_MS[0 : l],number_of_MS_per_cluster,
+                                                                                             number_of_CTAs_per_MS,result_list, init_index,int(faulty_MS % number_of_MS_per_cluster), block_executed_by_fauly_MS)  ))                
         
         for c in range(number_of_cluster):
             cluster_thread[c].start()
@@ -86,6 +96,10 @@ def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CT
 
 
     elif(scheduling_protocol == "Distributed_CTA"):
+        faulty_cluster = -1
+        if(faulty_MS != -1):
+            faulty_cluster = int(faulty_MS/number_of_MS_per_cluster)
+        
         to_schedule_CTAs_per_cluster = []
         for c in range(number_of_cluster):
             to_schedule_CTAs_per_cluster.append(int(n_CTA/number_of_cluster))
@@ -135,9 +149,15 @@ def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CT
                 init_index += to_schedule_CTAs_per_cluster[k]
             
             l = len(to_schedule_CTAs_per_MS)
-            cluster_thread.append(threading.Thread(target=Distributed_CTA_scheduler, args=(CTA_list[init_index : init_index+to_schedule_CTAs_per_cluster[c]],
-                                                                                           to_schedule_CTAs_per_MS[0 : l],number_of_MS_per_cluster,
-                                                                                           number_of_CTAs_per_MS,result_list, init_index)  ))
+            if(c != faulty_cluster):
+                cluster_thread.append(threading.Thread(target=Distributed_CTA_scheduler, args=(CTA_list[init_index : init_index+to_schedule_CTAs_per_cluster[c]],
+                                                                                                to_schedule_CTAs_per_MS[0 : l],number_of_MS_per_cluster,
+                                                                                                number_of_CTAs_per_MS,result_list, init_index, -1, None)  ))
+            else:
+                cluster_thread.append(threading.Thread(target=Distributed_CTA_scheduler, args=(CTA_list[init_index : init_index+to_schedule_CTAs_per_cluster[c]],
+                                                                                                to_schedule_CTAs_per_MS[0 : l],number_of_MS_per_cluster,
+                                                                                                number_of_CTAs_per_MS,result_list, init_index, int(faulty_MS % number_of_MS_per_cluster),
+                                                                                                block_executed_by_fauly_MS)  ))                
         for c in range(number_of_cluster):
             cluster_thread[c].start()
         for c in range(number_of_cluster):
@@ -146,6 +166,10 @@ def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CT
         return result_list 
 
     elif(scheduling_protocol == "Greedy-Clustering"):
+        faulty_cluster = -1
+        if(faulty_MS != -1):
+            faulty_cluster = int(faulty_MS/number_of_MS_per_cluster)
+
         num_of_CTA_in_cluster = number_of_CTAs_per_MS*number_of_MS_per_cluster
         total_num_of_CTA = num_of_CTA_in_cluster * number_of_cluster
         
@@ -193,9 +217,15 @@ def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CT
 
 
         for c in range(number_of_cluster):
-            cluster_thread.append(threading.Thread(target=Greedy_clustering_scheduler, args=(CTA_list,to_schedule_CTAs_per_cluster[c],
-                                                                                             number_of_MS_per_cluster,number_of_CTAs_per_MS,
-                                                                                             result_list)     ))
+            if(c != faulty_cluster):
+                cluster_thread.append(threading.Thread(target=Greedy_clustering_scheduler, args=(CTA_list,to_schedule_CTAs_per_cluster[c],
+                                                                                                number_of_MS_per_cluster,number_of_CTAs_per_MS,
+                                                                                                result_list, -1, None)     ))
+            else:
+                cluster_thread.append(threading.Thread(target=Greedy_clustering_scheduler, args=(CTA_list,to_schedule_CTAs_per_cluster[c],
+                                                                                                number_of_MS_per_cluster,number_of_CTAs_per_MS,
+                                                                                                result_list, int(faulty_MS % number_of_MS_per_cluster), block_executed_by_fauly_MS)     ))                
+
         for c in range(number_of_cluster):
             cluster_thread[c].start()
         for c in range(number_of_cluster):
@@ -204,6 +234,11 @@ def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CT
         return result_list
 
     elif(scheduling_protocol == "Global-round-robin"):
+        faulty_cluster = -1
+        if(faulty_MS != -1):
+            faulty_cluster = int(faulty_MS/number_of_MS_per_cluster)
+
+
         to_schedule_CTAs_per_cluster = []
         for c in range(number_of_cluster):
             to_schedule_CTAs_per_cluster.append([])
@@ -244,9 +279,16 @@ def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CT
                     dynamic_scheduled_row += 1
   
         for c in range(number_of_cluster):
-            cluster_thread.append(threading.Thread(target=Global_Round_Robin_scheduler, args=(CTA_list,to_schedule_CTAs_per_cluster[c],
-                                                                                              number_of_MS_per_cluster,number_of_CTAs_per_MS,
-                                                                                              result_list)     ))
+            if(c != faulty_cluster):
+                cluster_thread.append(threading.Thread(target=Global_Round_Robin_scheduler, args=(CTA_list,to_schedule_CTAs_per_cluster[c],
+                                                                                                number_of_MS_per_cluster,number_of_CTAs_per_MS,
+                                                                                                result_list,-1, None)     ))
+            else:   
+                cluster_thread.append(threading.Thread(target=Global_Round_Robin_scheduler, args=(CTA_list,to_schedule_CTAs_per_cluster[c],
+                                                                                                number_of_MS_per_cluster,number_of_CTAs_per_MS,
+                                                                                                result_list,int(faulty_MS % number_of_MS_per_cluster),
+                                                                                                block_executed_by_fauly_MS)     ))
+
         for c in range(number_of_cluster):
             cluster_thread[c].start()
         for c in range(number_of_cluster):
@@ -256,6 +298,11 @@ def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CT
         return result_list
 
     elif(scheduling_protocol == "Two-level-round-robin"):
+        faulty_cluster = -1
+        if(faulty_MS != -1):
+            faulty_cluster = int(faulty_MS/number_of_MS_per_cluster)
+        
+       
         to_schedule_CTAs_per_cluster = []
         
         
@@ -295,15 +342,22 @@ def Scheduler(CTA_list,number_of_cluster, number_of_MS_per_cluster, number_of_CT
                         cluster = 0
 
         for c in range(number_of_cluster):
-            cluster_thread.append(threading.Thread(target=Two_level_Round_Robin_scheduler, args=(CTA_list,to_schedule_CTAs_per_cluster[c],
-                                                                                                 number_of_CTAs_per_MS,number_of_MS_per_cluster,
-                                                                                                 result_list)     ))
+            if(c != faulty_cluster):
+                cluster_thread.append(threading.Thread(target=Two_level_Round_Robin_scheduler, args=(CTA_list,to_schedule_CTAs_per_cluster[c],
+                                                                                                    number_of_CTAs_per_MS,number_of_MS_per_cluster,
+                                                                                                    result_list, -1, None)    ))
+            else:
+                cluster_thread.append(threading.Thread(target=Two_level_Round_Robin_scheduler, args=(CTA_list,to_schedule_CTAs_per_cluster[c],
+                                                                                                    number_of_CTAs_per_MS,number_of_MS_per_cluster,
+                                                                                                    result_list,int(faulty_MS % number_of_MS_per_cluster),
+                                                                                                    block_executed_by_fauly_MS)     ))
+                
         for c in range(number_of_cluster):
             cluster_thread[c].start()
         for c in range(number_of_cluster):
             cluster_thread[c].join()
 
-
+        
         return result_list
  
     else: 

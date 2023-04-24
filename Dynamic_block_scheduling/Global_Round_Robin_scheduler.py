@@ -5,7 +5,7 @@ from Greedy_clustering_scheduler import MS_Greedy_clustering_scheduler
 from Delay_generator import random_delay_generator_simulator
 
 
-def Global_Round_Robin_scheduler(CTA_list, to_schedule_CTA_for_this_cluster, number_of_MS_per_cluster,number_of_CTA_per_MS, result_list):
+def Global_Round_Robin_scheduler(CTA_list, to_schedule_CTA_for_this_cluster, number_of_MS_per_cluster,number_of_CTA_per_MS, result_list,faulty_MS = -1, block_executed_by_fauly_MS =  None):
     to_schedule_CTAs_per_MS = []
     index_list = []
     matrix_block_list = []
@@ -75,8 +75,12 @@ def Global_Round_Robin_scheduler(CTA_list, to_schedule_CTA_for_this_cluster, num
                 matrix_block_list[ms][n_completed_sub_group].append(CTA_list[to_schedule_CTAs_per_MS[ms][n_completed_sub_group*number_of_CTA_per_MS + left]])
         
    
-        MS_threads.append(threading.Thread(target=MS_Greedy_clustering_scheduler, args=(matrix_block_list[ms],
-                                                                                        result_list, index_list[ms])     ))
+        if(ms != faulty_MS):
+            MS_threads.append(threading.Thread(target=MS_Greedy_clustering_scheduler, args=(matrix_block_list[ms],
+                                                                                            result_list, index_list[ms],-1, None)     ))
+        else:
+            MS_threads.append(threading.Thread(target=MS_Greedy_clustering_scheduler, args=(matrix_block_list[ms],
+                                                                                            result_list, index_list[ms], faulty_MS,block_executed_by_fauly_MS)     ))
 
         
     for ms in range(number_of_MS_per_cluster):
